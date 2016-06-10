@@ -1,5 +1,5 @@
 #imports
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def categoriesIndex():
-	return "Categories Index..."
+	return render_template('categories.html')
 
 @app.route('/catalog.json')
 def categoriesIndexJSON():
@@ -19,31 +19,36 @@ def categoriesIndexJSON():
 
 @app.route('/catalog/<category_name>/items')
 def categoryShow(category_name):
-	return "%s category Show page - listing category items" % category_name
+	return render_template('category_items.html', category_name = category_name) 
+	#TODO >> change category_name to category
 
 @app.route('/catalog/<category_name>/newItem', methods=['GET', 'POST'])
 def newItem(category_name):
-	return "Creating new Item for category %s" % category_name
+	return render_template('new_item.html', category_name = category_name) 
+	#TODO >> change category_name to category
 
 @app.route('/catalog/<category_name>/<item_name>')
 def itemsShow(category_name, item_name):
-	return "Showing item %s in Category %s" % (item_name, category_name)
+	return render_template('item.html', category_name = category_name, item_name = item_name)
+	#TODO >> change category_name to category and item_name to item (Will I need Category there?)
 
 @app.route('/catalog/<item_name>/edit', methods=['GET', 'POST'])
 def editItem(item_name):
-	return "Editing item %s" % item_name
+	return render_template('edit_item.html', item_name = item_name)
+	#TODO >> change item_name to item
 
 @app.route('/catalog/<item_name>/delete', methods=['GET', 'POST'])
 def deleteItem(item_name):
-	return "Deleting item %s" % item_name
+	return render_template('delete_item.html', item_name = item_name)
+	#TODO >> change item_name to item
 
 @app.route('/login')
 def login():
-	return "Logging In..."
+	return render_template('login.html')
 
 @app.route('/logout')
 def logout():
-	return "Logging out..."
+	return render_template('logout.html')
 
 
 

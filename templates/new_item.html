@@ -6,4 +6,21 @@
       <h1>Creating new Item for category {{category_name}}</h1>
     </div>
   </div>
+  <div class="row">
+  	<form action="{{url_for('newItem', category_name = category_name )}}" method = 'POST'>
+      <p>Name:</p>
+
+      <input type='text' size='30' name='name'>
+
+      <br />
+
+      <p>Description:</p>
+
+      <input type='text' size='30' name='description'>
+
+      <br />
+
+      <input type='submit' value='Create'>
+    </form>
+  </div>
 {% endblock %}

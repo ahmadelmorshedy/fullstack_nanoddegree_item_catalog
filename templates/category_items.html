@@ -3,7 +3,16 @@
 {% include "header.html" %}
   <div class="row">
     <div>
-      <h1>{{category_name}} category Show page - listing category items</h1>
+      <h1>{{category.name}} category Show page - listing category items</h1>
+      {% for item in items %}
+      	<div>
+      		<a href="{{url_for('itemShow', category_name = category.name, item_name = item.name)}}">{{item.name}}</a>
+      	</div>
+      {% endfor %}
     </div>
+  </div>
+  <hr />
+  <div class="row">
+    <a href="{{url_for('newItem', category_name = category.name)}}">new Item</a>
   </div>
 {% endblock %}

@@ -3,7 +3,19 @@
 {% include "header.html" %}
   <div class="row">
     <div>
-      <h1>Showing item {{item_name}} in Category {{category_name}}</h1>
+      <h1>Showing item {{item.name}} in Category {{category.name}}</h1>
     </div>
+    <div>
+    	<p>{{item.name}}</p>
+    	<p>{{item.description}}</p>
+    	<p>{{item.category.name}} (id: {{item.category_id}})</p>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+  	<a href="{{url_for('editItem', item_name = item.name)}}">edit</a>
+  </div>
+  <div class="row">
+  	<a href="{{url_for('deleteItem', item_name = item.name)}}">delete</a>
   </div>
 {% endblock %}

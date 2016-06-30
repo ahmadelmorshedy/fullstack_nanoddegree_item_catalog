@@ -13,6 +13,16 @@
   </div>
   <hr />
   <div class="row">
-    <a href="{{url_for('newItem', category_name = category.name)}}">new Item</a>
+    <div class="col-xs-6">
+      <div class="row">
+        <a href="{{url_for('editCategory', category_name = category.name)}}">edit</a>
+      </div>
+      <div class="row">
+        <a href="{{url_for('deleteCategory', category_name = category.name)}}">delete</a>
+      </div>
+    </div>
+    <div class="col-xs-6">
+      <a href="{{url_for('newItem', category_name = category.name)}}">new Item</a>
+    </div>
   </div>
 {% endblock %}

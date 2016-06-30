@@ -1,0 +1,20 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+  <div class="row">
+    <div>
+      <h1>Creating new Category</h1>
+    </div>
+  </div>
+  <div class="row">
+  	<form action="{{url_for('newCategory' )}}" method = 'POST'>
+      <p>Name:</p>
+
+      <input type='text' size='30' name='name'>
+
+      <br />
+
+      <input type='submit' value='Create'>
+    </form>
+  </div>
+{% endblock %}

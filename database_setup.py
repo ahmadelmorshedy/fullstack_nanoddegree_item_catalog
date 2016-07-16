@@ -21,6 +21,15 @@ class Category(Base):
 	user_id = Column(Integer, ForeignKey('users.id'))
 	user = relationship(User)
 
+	@property
+	def serialize(self):
+		return {
+			'name': self.name,
+			'id': self.id,
+			'creator_email': self.user.email,
+			'creator_id': self.user_id,
+		}
+
 class Item(Base):
 	__tablename__ = 'items'
 
@@ -31,8 +40,19 @@ class Item(Base):
 	category = relationship(Category)
 	user_id = Column(Integer, ForeignKey('users.id'))
 	user = relationship(User)
+
+	@property
+	def serialize(self):
+		return {
+			'name': self.name,
+			'id': self.id,
+			'category_id': self.category_id,
+			'category': self.category.name,
+			'creator_email': self.user.email,
+			'creator_id': self.user_id,
+		}
 #=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #Configuration=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-engine = create_engine('sqlite:///cameracatalogwithusers_4.db')
+engine = create_engine('sqlite:///cameracatalogwithusers_6.db')
 Base.metadata.create_all(engine)

@@ -1,5 +1,5 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__)
 
@@ -24,7 +24,7 @@ import httplib2
 # comprehensive http client librrary in Python 
 
 import json 
-# converts in memory python objects to a seriialized representation (JSON)
+# converts in memory python objects to a serialized representation (JSON)
 
 from flask import make_response 
 # converts the return value from a function into a real response object
@@ -36,7 +36,7 @@ import requests
 
 CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
 
-engine = create_engine('sqlite:///cameracatalogwithusers_4.db')
+engine = create_engine('sqlite:///cameracatalogwithusers_6.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind = engine)
@@ -61,7 +61,8 @@ def categoriesIndex():
 
 @app.route('/catalog.json')
 def categoriesIndexJSON():
-	return "Categories Index JSON..."
+	categories = session.query(Category)
+	return jsonify(Categories=[c.serialize for c in categories])
 
 @app.route('/catalog/<category_name>/items')
 def categoryShow(category_name):
@@ -72,7 +73,13 @@ def categoryShow(category_name):
 	else:
 		user = login_session['user_id']
 	return render_template('category_items.html', category = category, 
-							items = items, user = user) 
+							items = items, user = user)
+
+@app.route('/catalog/<category_name>/items.json')
+def categoryShowJSON(category_name):
+	category = session.query(Category).filter_by(name = category_name).one()
+	items = session.query(Item).filter_by(category_id = category.id)
+	return jsonify(CategoryItems=[i.serialize for i in items])
 
 @app.route('/catalog/categories/new', methods=['GET', 'POST'])
 def newCategory():

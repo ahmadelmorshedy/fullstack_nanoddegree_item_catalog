@@ -79,7 +79,7 @@ def newCategory():
 	if 'username' not in login_session:
 		return redirect('/login')
 	if request.method == 'POST':
-		newCategory = Category(name = request.form['name'])
+		newCategory = Category(name = request.form['name'], user_id = login_session['user_id'])
 		session.add(newCategory)
 		session.commit()
 		return redirect(url_for('categoryShow', 
@@ -125,7 +125,8 @@ def newItem(category_name):
 	if request.method == 'POST':
 		newItem = Item(name = request.form['name'], 
 						description  = request.form['description'], 
-						category_id = category.id)
+						category_id = category.id,
+						user_id = login_session['user_id'])
 		session.add(newItem)
 		session.commit()
 		return redirect(url_for('itemShow', category_name = category_name, 

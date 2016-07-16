@@ -68,6 +68,8 @@ def categoryShow(category_name):
 
 @app.route('/catalog/categories/new', methods=['GET', 'POST'])
 def newCategory():
+	if 'username' not in login_session:
+		return redirect('/login')
 	if request.method == 'POST':
 		newCategory = Category(name = request.form['name'])
 		session.add(newCategory)
@@ -79,6 +81,8 @@ def newCategory():
 
 @app.route('/catalog/<category_name>/edit', methods=['GET', 'POST'])
 def editCategory(category_name):
+	if 'username' not in login_session:
+		return redirect('/login')
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
 		session.query(Category).filter_by(id = category.id).update({"name": 
@@ -92,6 +96,8 @@ def editCategory(category_name):
 
 @app.route('/catalog/<category_name>/delete', methods=['GET', 'POST'])
 def deleteCategory(category_name):
+	if 'username' not in login_session:
+		return redirect('/login')
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
 		items = session.query(Item).filter_by(category_id = category.id)
@@ -105,6 +111,8 @@ def deleteCategory(category_name):
 
 @app.route('/catalog/<category_name>/items/new', methods=['GET', 'POST'])
 def newItem(category_name):
+	if 'username' not in login_session:
+		return redirect('/login')
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
 		newItem = Item(name = request.form['name'], 
@@ -126,6 +134,8 @@ def itemShow(category_name, item_name):
 
 @app.route('/catalog/<item_name>/edit', methods=['GET', 'POST'])
 def editItem(item_name):
+	if 'username' not in login_session:
+		return redirect('/login')
 	item = session.query(Item).filter_by(name = item_name).one()
 	if request.method == 'POST':
 		session.query(Item).filter_by(id = item.id).update(
@@ -139,6 +149,8 @@ def editItem(item_name):
 
 @app.route('/catalog/<item_name>/delete', methods=['GET', 'POST'])
 def deleteItem(item_name):
+	if 'username' not in login_session:
+		return redirect('/login')
 	item = session.query(Item).filter_by(name = item_name).one()
 	category = item.category
 	if request.method == 'POST':

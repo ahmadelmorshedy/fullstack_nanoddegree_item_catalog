@@ -52,8 +52,12 @@ session = DBSession()
 def categoriesIndex():
 	categories = session.query(Category)
 	last_items = session.query(Item).order_by(desc(Item.id)).limit(10) #get last ten items
+	if 'username' not in login_session:
+		user = "guest"
+	else:
+		user = login_session['user_id']
 	return render_template('categories.html', categories = categories, 
-							last_items = last_items)
+							last_items = last_items, user = user)
 
 @app.route('/catalog.json')
 def categoriesIndexJSON():
@@ -63,8 +67,12 @@ def categoriesIndexJSON():
 def categoryShow(category_name):
 	category = session.query(Category).filter_by(name = category_name).one()
 	items = session.query(Item).filter_by(category_id = category.id)
+	if 'username' not in login_session:
+		user = "guest"
+	else:
+		user = login_session['user_id']
 	return render_template('category_items.html', category = category, 
-							items = items) 
+							items = items, user = user) 
 
 @app.route('/catalog/categories/new', methods=['GET', 'POST'])
 def newCategory():
@@ -129,7 +137,12 @@ def newItem(category_name):
 def itemShow(category_name, item_name):
 	category = session.query(Category).filter_by(name = category_name).one()
 	item = session.query(Item).filter_by(name = item_name).one()
-	return render_template('item.html', category = category, item = item)
+	if 'username' not in login_session:
+		user = "guest"
+	else:
+		user = login_session['user_id']
+	return render_template('item.html', category = category, item = item, 
+							user = user)
 	#TODO >> Will I need Category there?
 
 @app.route('/catalog/<item_name>/edit', methods=['GET', 'POST'])

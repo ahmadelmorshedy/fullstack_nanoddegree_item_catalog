@@ -11,11 +11,13 @@
     	<p>{{item.category.name}} (id: {{item.category_id}})</p>
     </div>
   </div>
-  <hr />
-  <div class="row">
-  	<a href="{{url_for('editItem', item_name = item.name)}}">edit</a>
-  </div>
-  <div class="row">
-  	<a href="{{url_for('deleteItem', item_name = item.name)}}">delete</a>
-  </div>
+  {% if item.user_id == user %}
+    <hr />
+    <div class="row">
+    	<a href="{{url_for('editItem', item_name = item.name)}}">edit</a>
+    </div>
+    <div class="row">
+    	<a href="{{url_for('deleteItem', item_name = item.name)}}">delete</a>
+    </div>
+  {% endif %}
 {% endblock %}

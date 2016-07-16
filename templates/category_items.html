@@ -11,18 +11,22 @@
       {% endfor %}
     </div>
   </div>
-  <hr />
-  <div class="row">
-    <div class="col-xs-6">
-      <div class="row">
-        <a href="{{url_for('editCategory', category_name = category.name)}}">edit</a>
+  {% if category.user_id != "guest" %}
+    <hr />
+    <div class="row">
+      <div class="col-xs-6">
+        {% if category.user_id == user %}
+          <div class="row">
+            <a href="{{url_for('editCategory', category_name = category.name)}}">edit</a>
+          </div>
+          <div class="row">
+            <a href="{{url_for('deleteCategory', category_name = category.name)}}">delete</a>
+          </div>
+        {% endif %}
       </div>
-      <div class="row">
-        <a href="{{url_for('deleteCategory', category_name = category.name)}}">delete</a>
+      <div class="col-xs-6">
+        <a href="{{url_for('newItem', category_name = category.name)}}">new Item</a>
       </div>
     </div>
-    <div class="col-xs-6">
-      <a href="{{url_for('newItem', category_name = category.name)}}">new Item</a>
-    </div>
-  </div>
+  {% endif %}
 {% endblock %}

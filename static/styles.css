@@ -1,0 +1,187 @@
+body { 
+	/*font-family: "Helvetica Neue Bold", Roboto, Helvetica, Arial, sans-serif;*/
+	/*font-family: sans-serif;*/
+	/*background-image: url('img3.jpg'); */
+	background-color: #333333;
+	font-family: 'Georgia', serif; 
+	/*font-weight: 700;*/
+}
+h1, h2, h3, h4 { 
+	color: #FFFFFF; 
+}
+h1, h2	{ 
+	font-family: 'Georgia', serif; 
+	/*margin: 0; */
+}
+h1              { text-decoration: underline; text-decoration-color: #eee; text-decoration-line: 1px; text-decoration-style: solid; }
+h2              { font-size: 1.2em; }
+
+/*p, dd, dt               { color: #CCCCCC;}*/
+
+a {
+	text-decoration: none; 
+	color:#FFFFCC; 
+	/*font-size: .75em;*/
+
+	font-size: 14px;
+ 	/*color: #0093B9;*/
+ 	line-height: 17px;
+}
+
+/*.header         {left:50%; text-align: center;}*/
+/*.name {width:50%;display: inline-block; float: left;}
+.description {}
+.price {text-align: right; width:50%; float: right; }
+.editdeletepane{}*/
+
+.flash { 
+	background: #cee5F5;
+	/*background-color: #98FB98;*/
+	width:100%;
+	text-decoration: none;
+}
+
+.flash li {
+	list-style-type: none;
+	text-align: center;
+}
+
+/*elli fo2 hamada - welli ta7t hamada tani 5aaaaaaales*/
+
+
+/* p {
+ 	font-family: "Helvetica Neue", Roboto, Helvetica, Arial, sans-serif;
+ 	font-size: 16px;
+ 	color: #7B7573;
+ 	line-height: 24px;
+ 	font-weight: 400;
+ }*/
+
+/* strong {
+ 	font-size: 16px;
+ 	color: #7B7573;
+ 	line-height: 24px;
+ } */
+
+/*.padding-top {
+	padding-top: 30px;
+}
+.padding-bottom {
+	padding-bottom: 30px;
+}
+.margin-right {
+	margin-right: 30px;
+}
+.padding-none {
+	padding: 0;
+}
+.btn {
+	padding: 20px;
+	margin: 0;
+	border-color: #9FB80A;
+	border-width: 2px;
+	color: #9FB80A;;
+}
+.btn:hover {
+	border-color: #9FB80A;
+}
+.btn.delete {
+	border-color: #aaaaaa;
+	color: #aaaaaa;
+}
+.btn.delete:hover {
+	border-color: #aaaaaa;
+	color: red;
+}*/
+.glyphicon {
+	margin-right: 10px;
+}
+.top-menu {
+	padding-top: 30px;
+	padding-bottom: 30px;
+	border-bottom: 2px solid #eee;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	/*color: #FF0000;*/
+	background-color: #FF0000;
+	width: 100%;
+}
+.top-menu p {
+	margin-bottom: ;
+	line-height: 16px;
+}
+.top-menu a {
+	margin-bottom: 0;
+	line-height: 16px;
+	font-size: 16px;
+	/*color: #7B7573;*/
+	color: #0000FF;
+	font-weight: 400;
+	margin-bottom: 20px;
+}
+
+.nosidepadding {
+	margin-left: 0 !important;
+	padding-left: 0 !important;
+	margin-right: 0 !important;
+	padding-right: 0 !important;
+}
+/*.divider {
+	height: 15px;
+}
+.divider.blue {
+	background-color: #42C3C9;
+}
+.divider.green {
+	background-color: #9FB80A;
+}
+.banner.main {
+	height: 150px;
+	background: url("/static/top-banner.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+.banner.menu {
+	height: 150px;
+	background-color: #E1E17F;
+}
+.banner.profile {
+	height: 150px;
+	background-color: #A6E8EB;
+}
+.banner h1 {
+	margin: 45px 0;
+}
+ .restaurant-list {
+ 	background-color: #F0F0F0;
+ 	padding: 20px;
+u }
+ .restaurant-list:hover {
+ 	background-color: #e1e17f;
+ 	padding: 20px;
+}
+.menu-item {
+	background: #F0F0F0;
+	padding: 20px;
+	margin: 20px;
+	margin-left: -20px;
+}
+.menu-price {
+	font-weight: 700;
+}
+.creator {
+	padding-right: 20px;
+	margin-top: -20px;
+	text-align: right;
+	float:right;
+}
+.creator img {
+	width: 100px;
+	border-radius: 50%;
+}
+.creator figcaption {
+	font-size: 14px;
+	color: #7B7573;
+	font-weight: 400;
+	margin-top: -20px;
+}*/

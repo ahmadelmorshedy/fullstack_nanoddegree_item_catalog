@@ -1,7 +1,5 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
-
-app = Flask(__name__)
+from flask import Flask,render_template,request,redirect,url_for,jsonify,flash
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -34,11 +32,16 @@ import requests
 # Apache 2 license HTTP library writeen in python, similar to urllib2 but with 
 # few improvements
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
+# setting app
+app = Flask(__name__)
 
+# loading client secrets
+client_secrets_loaded = json.loads(open('client_secret.json', 'r').read())
+CLIENT_ID = client_secrets_loaded['web']['client_id']
+
+#creating DB engine session
 engine = create_engine('sqlite:///cameracatalogwithusers_6.db')
 Base.metadata.bind = engine
-
 DBSession = sessionmaker(bind = engine)
 session = DBSession()
 
@@ -48,91 +51,118 @@ session = DBSession()
 #site/catalog/SnowBoard/edit (SnowBoard is the item name)
 #site/catalog/SnowBoard/delete (SnowBoard is the item name)
 
+# home page
 @app.route('/')
 def categoriesIndex():
+	# read all categories from the DataBase
 	categories = session.query(Category)
-	last_items = session.query(Item).order_by(desc(Item.id)).limit(10) #get last ten items
-	if 'username' not in login_session:
-		user = "guest"
-	else:
-		user = login_session['user_id']
+	# get last 10 items
+	last_items = session.query(Item).order_by(desc(Item.id)).limit(10)
+	# use setup_user_paramter to identify whether this is a user session or
+	# guest session
+	user = setup_user_parameter()
 	return render_template('categories.html', categories = categories, 
 							last_items = last_items, user = user)
 
+# catalogs json API
 @app.route('/catalog.json')
 def categoriesIndexJSON():
+	# read all categories
 	categories = session.query(Category)
 	return jsonify(Categories=[c.serialize for c in categories])
 
+# category show page
 @app.route('/catalog/<category_name>/items')
 def categoryShow(category_name):
+	# find category by name
 	category = session.query(Category).filter_by(name = category_name).one()
+	# getting category items
 	items = session.query(Item).filter_by(category_id = category.id)
-	if 'username' not in login_session:
-		user = "guest"
-	else:
-		user = login_session['user_id']
+	# checking user/guest session
+	user = setup_user_parameter()
 	return render_template('category_items.html', category = category, 
 							items = items, user = user)
 
+# category show JSON API
 @app.route('/catalog/<category_name>/items.json')
 def categoryShowJSON(category_name):
 	category = session.query(Category).filter_by(name = category_name).one()
 	items = session.query(Item).filter_by(category_id = category.id)
 	return jsonify(CategoryItems=[i.serialize for i in items])
 
+# create category
 @app.route('/catalog/categories/new', methods=['GET', 'POST'])
 def newCategory():
 	if 'username' not in login_session:
+		# redirect to login page
 		return redirect('/login')
 	if request.method == 'POST':
-		newCategory = Category(name = request.form['name'], user_id = login_session['user_id'])
+		# creating new category
+		newCategory = Category(name = request.form['name'], 
+									user_id = login_session['user_id'])
 		session.add(newCategory)
 		session.commit()
 		flash("New Category Created")
+		# redirect to newly created category show page
 		return redirect(url_for('categoryShow', 
 								category_name = request.form['name']))
 	else:
+		# rendering Category create form
 		return render_template('new_category.html') 
 
+# edit category
 @app.route('/catalog/<category_name>/edit', methods=['GET', 'POST'])
 def editCategory(category_name):
 	if 'username' not in login_session:
+		# redirect to login page
 		return redirect('/login')
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
+		# updating category
 		session.query(Category).filter_by(id = category.id).update({"name": 
 													request.form['name']})
 		session.commit()
 		flash("Category Edited Successfully")
+		# get possibly existing items
 		items = session.query(Item).filter_by(category_id = category.id)
+		# redirect to updated category show page
 		return redirect(url_for('categoryShow', 
 									category_name = request.form['name']))
 	else:
+		# rendering Category edit form
 		return render_template('edit_category.html', category = category)
 
+# delete category
 @app.route('/catalog/<category_name>/delete', methods=['GET', 'POST'])
 def deleteCategory(category_name):
 	if 'username' not in login_session:
+		# redirect to login page
 		return redirect('/login')
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
+		# deleting category
 		items = session.query(Item).filter_by(category_id = category.id)
 		for item in items:
 			session.delete(item)
 		session.delete(category)
 		session.commit()
 		flash("Category Deleted")
+		# redirect to Home Page
 		return redirect(url_for('categoriesIndex'))
 	else:
+		# rendering Category delete coonfirmation page
 		return render_template('delete_category.html', category = category)
 
+# create Item
 @app.route('/catalog/<category_name>/items/new', methods=['GET', 'POST'])
 def newItem(category_name):
 	if 'username' not in login_session:
+		# redirect to login page
 		return redirect('/login')
+	# load parent category
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
+		# create item
 		newItem = Item(name = request.form['name'], 
 						description  = request.form['description'], 
 						category_id = category.id,
@@ -140,55 +170,75 @@ def newItem(category_name):
 		session.add(newItem)
 		session.commit()
 		flash("New Item Created")
+		# redirect to newly created Item Show page
 		return redirect(url_for('itemShow', category_name = category_name, 
 						item_name = request.form['name']))
 	else:
+		# rendering Item creation fform page
 		return render_template('new_item.html', category_name = category_name) 
 
+# Item Show
 @app.route('/catalog/<category_name>/<item_name>')
 def itemShow(category_name, item_name):
+	# get item category
 	category = session.query(Category).filter_by(name = category_name).one()
+	# getiing Item
 	item = session.query(Item).filter_by(name = item_name).one()
-	if 'username' not in login_session:
-		user = "guest"
-	else:
-		user = login_session['user_id']
+	# checking user/guest session
+	user = setup_user_parameter()
+	# render item show page
 	return render_template('item.html', category = category, item = item, 
 							user = user)
 	#TODO >> Will I need Category there?
 
+# edit Item
 @app.route('/catalog/<item_name>/edit', methods=['GET', 'POST'])
 def editItem(item_name):
 	if 'username' not in login_session:
+		# redirect to login page
 		return redirect('/login')
+	# get Item
 	item = session.query(Item).filter_by(name = item_name).one()
 	if request.method == 'POST':
+		# update Item
 		session.query(Item).filter_by(id = item.id).update(
 						{"name": request.form['name'], 
 						"description": request.form['description']})
 		session.commit()
 		flash("Item edited")
+		# redirect to Item show page
 		return redirect(url_for('itemShow', category_name = item.category.name, 
 						item_name = request.form['name']))
 	else:
+		# render Item edit form
 		return render_template('edit_item.html', item = item)
 
+# delete item
 @app.route('/catalog/<item_name>/delete', methods=['GET', 'POST'])
 def deleteItem(item_name):
 	if 'username' not in login_session:
+		# redirect to login page
 		return redirect('/login')
+	# get item & category
 	item = session.query(Item).filter_by(name = item_name).one()
 	category = item.category
 	if request.method == 'POST':
+		# delete Item
 		session.delete(item)
 		session.commit()
+		# return to item's category show page
 		return redirect(url_for('categoryShow', category_name = category.name))
 	else:
+		# render Item deletion confirmation page
 		return render_template('delete_item.html', item = item)
 
+# login
 @app.route('/login')
 def login():
-	state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+	# generate string
+	generated_string = string.ascii_uppercase + string.digits
+	# use generated string to generate a random 32-length key
+	state = ''.join(random.choice(generated_string) for x in xrange(32))
 	login_session['state'] = state
 	return render_template('login.html', STATE=state)
 
@@ -198,6 +248,7 @@ def logout():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+	# check for state variable
 	if request.args.get('state') != login_session['state']:
 		flash("Login failed - Invalid State Parameter")
 		return redirect(url_for('categoriesIndex'))
@@ -245,6 +296,7 @@ def gconnect():
 	answer = requests.get(userinfo_url, params=params)
 	data = json.loads(answer.text)
 
+	# store user info into login session
 	login_session['provider'] = 'google'
 	login_session['username'] = data['name']
 	login_session['picture'] = data['picture']
@@ -257,6 +309,7 @@ def gconnect():
 	login_session['user_id'] = user_id
 
 	flash("you are now logged in as %s" % login_session['username'])
+	# redirect to Home Page
 	return redirect(url_for('categoriesIndex'))
 
 #DISCONNECT
@@ -288,6 +341,7 @@ def gdisconnect():
 		flash("Error During log out, please try again later.")
 		return redirect(url_for('categoriesIndex'))
 
+# method to search/get user Id by email
 def getUserId(email):
 	try:
 		user = session.query(User).filter_by(email = email).one()
@@ -295,10 +349,12 @@ def getUserId(email):
 	except:
 		return None
 
+# method to get user info by Id
 def getUserInfo(user_id):
 	user = session.query(User).filter_by(id = user_id).one()
 	return user
 
+# registers a new User
 def createUser(login_session):
 	newUser = User(name = login_session['username'], email = 
 		login_session['email'], picture = login_session['picture'])
@@ -307,6 +363,15 @@ def createUser(login_session):
 	user = session.query(User).filter_by(email = login_session['email']).one()
 	return user.id
 
+# checks whether there exists a loggged in user or not, returns either user id
+# or "guest"
+def setup_user_parameter():
+	if 'username' not in login_session:
+		return "guest" # guest
+	return login_session['user_id'] # user logged in
+
+
+# app setup
 if __name__ == '__main__':
   app.secret_key = 'super_secret_key'
   app.debug = True

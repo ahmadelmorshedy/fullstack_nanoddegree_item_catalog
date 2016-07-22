@@ -1,5 +1,5 @@
 #imports
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 
 app = Flask(__name__)
 
@@ -89,6 +89,7 @@ def newCategory():
 		newCategory = Category(name = request.form['name'], user_id = login_session['user_id'])
 		session.add(newCategory)
 		session.commit()
+		flash("New Category Created")
 		return redirect(url_for('categoryShow', 
 								category_name = request.form['name']))
 	else:
@@ -103,6 +104,7 @@ def editCategory(category_name):
 		session.query(Category).filter_by(id = category.id).update({"name": 
 													request.form['name']})
 		session.commit()
+		flash("Category Edited Successfully")
 		items = session.query(Item).filter_by(category_id = category.id)
 		return redirect(url_for('categoryShow', 
 									category_name = request.form['name']))
@@ -120,6 +122,7 @@ def deleteCategory(category_name):
 			session.delete(item)
 		session.delete(category)
 		session.commit()
+		flash("Category Deleted")
 		return redirect(url_for('categoriesIndex'))
 	else:
 		return render_template('delete_category.html', category = category)
@@ -136,6 +139,7 @@ def newItem(category_name):
 						user_id = login_session['user_id'])
 		session.add(newItem)
 		session.commit()
+		flash("New Item Created")
 		return redirect(url_for('itemShow', category_name = category_name, 
 						item_name = request.form['name']))
 	else:
@@ -163,6 +167,7 @@ def editItem(item_name):
 						{"name": request.form['name'], 
 						"description": request.form['description']})
 		session.commit()
+		flash("Item edited")
 		return redirect(url_for('itemShow', category_name = item.category.name, 
 						item_name = request.form['name']))
 	else:
@@ -194,9 +199,8 @@ def logout():
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 	if request.args.get('state') != login_session['state']:
-		response = make_response(json.dumps('Invalid State Parameter'), 401)
-		response.headers['Content-Type'] = 'application/json'
-		return response
+		flash("Login failed - Invalid State Parameter")
+		return redirect(url_for('categoriesIndex'))
 	code = request.data
 	try:
 		#upgrade the authorization code into a credentials object
@@ -204,10 +208,8 @@ def gconnect():
 		oauth_flow.redirect_uri = 'postmessage'
 		credentials = oauth_flow.step2_exchange(code)
 	except FlowExchangeError:
-		response = make_response(json.dumps
-			('Failed to updgrade the authorization code'), 401)
-		response.headers['Content-Type'] = 'application/json'
-		return response
+		flash("Login failed - Failed to updgrade the authorization code")
+		return redirect(url_for('categoriesIndex'))
 	#check that the credentials object is valid
 	access_token = credentials.access_token
 	url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % 
@@ -215,29 +217,23 @@ def gconnect():
 	h = httplib2.Http()
 	result = json.loads(h.request(url, 'GET')[1])
 	if result.get('error') is not None:
-		response = make_response(json.dumps(result.get('error')), 500)
-		response.headers['Content-Type'] = 'application/json'
+		flash("Login failed - error")
+		return redirect(url_for('categoriesIndex'))
 	#Verify that the access token is used for the intended user
 	gplus_id = credentials.id_token['sub']
 	if result['user_id'] != gplus_id:
-		response = make_response(json.dumps
-			("Token's User ID desn't match given user id"), 401)
-		response.headers['Content-Type'] = 'application/json'
-		return response
+		flash("Login failed - Token's User ID desn't match given user id")
+		return redirect(url_for('categoriesIndex'))
 	#Verify that the access token is valid for this app
 	if result['issued_to'] != CLIENT_ID:
-		response = make_response(json.dumps
-			("Token's Client ID desn't match app's."), 401)
-		print "Token's Client ID desn't match app's."
-		response.headers['Content-Type'] = 'application/json'
-		return response
+		flash("Login failed - Token's Client ID desn't match app's.")
+		return redirect(url_for('categoriesIndex'))
 	#check to see if user is already signed in
 	stored_credentials = login_session.get('credentials')
 	stored_gplus_id = login_session.get('gplus_id')
 	if stored_credentials is not None and gplus_id == stored_gplus_id:
-		response = make_response(json.dumps
-			("Current User is already Connected."), 200)
-		response.headers['Content-Type'] = 'application/json'
+		flash("Current User is already Connected.")
+		return redirect(url_for('categoriesIndex'))
 
 	#store the acces token in the session for later use
 	login_session['credentials'] = credentials
@@ -260,16 +256,8 @@ def gconnect():
 		user_id = createUser(login_session)
 	login_session['user_id'] = user_id
 
-	output = ''
-	output += '<h1>Welcome, '
-	output += login_session['username']
-	output += '!</h1>'
-	output += '<img src="'
-	output += login_session['picture']
-	output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-	#TODO >> copy flash here
-	print "done!"
-	return output
+	flash("you are now logged in as %s" % login_session['username'])
+	return redirect(url_for('categoriesIndex'))
 
 #DISCONNECT
 @app.route('/gdisconnect')
@@ -294,15 +282,11 @@ def gdisconnect():
 		del login_session['picture']
 		del login_session['user_id']
 
-		response = make_response(json.dumps("Successfully disconnected."), 200)
-		response.headers['Content-Type'] = 'application/json'
-		return response
+		flash("You have successfully been logged out.")
+		return redirect(url_for('categoriesIndex'))
 	else:
-		#The given tooken was invalid
-		response = make_response(json.dumps
-			("Failed to revoke token for given user"), 400)
-		response.headers['Content-Type'] = 'application/json'
-		return response
+		flash("Error During log out, please try again later.")
+		return redirect(url_for('categoriesIndex'))
 
 def getUserId(email):
 	try:

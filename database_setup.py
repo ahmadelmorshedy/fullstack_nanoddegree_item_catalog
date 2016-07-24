@@ -54,5 +54,5 @@ class Item(Base):
 #=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #Configuration=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-engine = create_engine('sqlite:///cameracatalogwithusers_6.db')
+engine = create_engine('sqlite:///cameracatalogwithusers_7.db')
 Base.metadata.create_all(engine)

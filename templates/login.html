@@ -45,6 +45,7 @@
 					success: function(result) {
 						// Handle or verify the server response if necessary.
 						if (result) {
+							console.log("Logged In")
 							$('#result').html('Login Successful!</br>'+ result +
 							 '</br>Redirecting...')
 							setTimeout(function() {

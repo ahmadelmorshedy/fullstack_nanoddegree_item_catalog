@@ -110,7 +110,6 @@ def editCategory(category_name):
 	if 'username' not in login_session:
 		# redirect to login page
 		return redirect('/login')
-	# print "Category name: %s" % category_name
 	category = session.query(Category).filter_by(name = category_name).one()
 	if request.method == 'POST':
 		# updating category
@@ -232,10 +231,8 @@ def deleteItem(item_name):
 def login():
 	# generate string
 	generated_string = string.ascii_uppercase + string.digits
-	# print "login - string generated : {{generated_string}}"
 	# use generated string to generate a random 32-length key
 	state = ''.join(random.choice(generated_string) for x in xrange(32))
-	# print "login - state : {{state}}"
 	login_session['state'] = state
 	return render_template('login.html', STATE=state)
 
@@ -247,61 +244,44 @@ def logout():
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 	# check for state variable
-	# print "gconnect - start"
 	if request.args.get('state') != login_session['state']:
-		# print "gconnect Failure 1"
 		flash("Login failed - Invalid State Parameter")
 		return redirect(url_for('categoriesIndex'))
 	code = request.data
-	# print "gconnect - got code"
 	try:
 		#upgrade the authorization code into a credentials object
 		oauth_flow = flow_from_clientsecrets('client_secret.json', scope='')
-		# print "gconnect - oauth_flow got"
 		oauth_flow.redirect_uri = 'postmessage'
-		# print "gconnect - redirect_uri"
 		credentials = oauth_flow.step2_exchange(code)
-		# print "gconnect - credentials set"
 	except FlowExchangeError:
-		# print "gconnect - Failure 2"
 		flash("Login failed - Failed to updgrade the authorization code")
 		return redirect(url_for('categoriesIndex'))
 	#check that the credentials object is valid
 	access_token = credentials.access_token
-	# print "gconnect - access token set"
 	url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % 
 		access_token)
 	h = httplib2.Http()
-	# print "gconnect - loading url"
 	result = json.loads(h.request(url, 'GET')[1])
 	if result.get('error') is not None:
-		# print "gconnect - Failure 3"
 		flash("Login failed - error")
 		return redirect(url_for('categoriesIndex'))
 	#Verify that the access token is used for the intended user
 	gplus_id = credentials.id_token['sub']
-	# print "gconnect - gplus_id set"
 	if result['user_id'] != gplus_id:
-		# print "gconnect - Failure 4"
 		flash("Login failed - Token's User ID desn't match given user id")
 		return redirect(url_for('categoriesIndex'))
 	#Verify that the access token is valid for this app
 	if result['issued_to'] != CLIENT_ID:
-		# print "gconnect - Failure 5"
 		flash("Login failed - Token's Client ID desn't match app's.")
 		return redirect(url_for('categoriesIndex'))
 	#check to see if user is already signed in
-	# print "gconnect - checking already signed in user"
 	stored_credentials = login_session.get('credentials')
 	stored_gplus_id = login_session.get('gplus_id')
 	if stored_credentials is not None and gplus_id == stored_gplus_id:
-		# print "gconnect - Already Logged In"
 		flash("Current User is already Connected.")
-		# print "gconnect - redirecting to categories Index"
 		return redirect(url_for('categoriesIndex'))
 
 	#store the acces token in the session for later use
-	# print "gconnect - saving user info & credentials"
 	login_session['credentials'] = credentials
 	login_session['gplus_id'] = gplus_id
 
@@ -318,16 +298,13 @@ def gconnect():
 	login_session['email'] = data['email']
 
 	# See if user exists, if it dowsn't make a new one
-	# print "gconnect - checking new / existing User"
 	user_id = getUserId(login_session['email'])
 	if user_id is None: #if not user_id (solution video)
-		# print "gconnect - new User"
 		user_id = createUser(login_session)
 	login_session['user_id'] = user_id
 
 	flash("you are now logged in as %s" % login_session['username'])
 	# redirect to Home Page
-	# print "gconnect - Home Sweet Home"
 	# return redirect(url_for('categoriesIndex'))
 	response = make_response(json.dumps('Successfully logged in'), 200)
 	response.headers['Content-Type'] = 'application/json'
@@ -336,23 +313,18 @@ def gconnect():
 #DISCONNECT
 @app.route('/gdisconnect')
 def gdisconnect():
-	# print "gdisconnect - start"
 	credentials = login_session.get('credentials')
 	if credentials is None:
-		# print "gdisconnect - Failure 1"
 		response = make_response(json.dumps("Current User nort connected"), 401)
 		response.headers['Content-Type'] = 'application/json'
 		return response
 	#Execute HTTP GET request to revoke current token
 	access_token = credentials.access_token
-	# print "gdisconnect - got access token"
 	url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
 	h = httplib2.Http()
-	# print "gdisconnect - calling ggooleapis"
 	result = h.request(url, 'GET')[0]
 
 	if result['status'] == '200':
-		# print "gdisconnect - resetting session"
 		#Reset user's session
 		del login_session['credentials']
 		del login_session['gplus_id']
@@ -362,10 +334,8 @@ def gdisconnect():
 		del login_session['user_id']
 
 		flash("You have successfully been logged out.")
-		# print "gdisconnect - Home Sweet Home"
 		return redirect(url_for('categoriesIndex'))
 	else:
-		# print "gdisconnect - Failure 2"
 		flash("Error During log out, please try again later.")
 		return redirect(url_for('categoriesIndex'))
 

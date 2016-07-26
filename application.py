@@ -281,8 +281,8 @@ def gconnect():
 		flash("Current User is already Connected.")
 		return redirect(url_for('categoriesIndex'))
 
-	#store the acces token in the session for later use
-	login_session['credentials'] = credentials
+	#store the access token in the session for later use
+	login_session['credentials'] = credentials.access_token
 	login_session['gplus_id'] = gplus_id
 
 	#Get User Info
@@ -319,7 +319,7 @@ def gdisconnect():
 		response.headers['Content-Type'] = 'application/json'
 		return response
 	#Execute HTTP GET request to revoke current token
-	access_token = credentials.access_token
+	access_token = credentials
 	url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
 	h = httplib2.Http()
 	result = h.request(url, 'GET')[0]
